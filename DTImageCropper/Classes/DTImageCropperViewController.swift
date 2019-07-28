@@ -34,22 +34,46 @@ open class DTImageCropperViewController: UIViewController {
             return
         }
         
+        guard self.imagePicker == nil else {
+            self.imagePicker = nil
+            switch self.navigationController {
+            case nil:
+                switch self.presentingViewController {
+                case nil:
+                   fatalError("I honestly do not know how this was shown now")
+                default:
+                    self.dismiss(animated: true)
+                }
+            default:
+                self.navigationController?.popViewController(animated: true)
+            }
+            return
+        }
+        
+        self.imagePicker = UIImagePickerController.init()
+        self.imagePicker?.sourceType = .photoLibrary
+        self.imagePicker?.delegate = self
+        self.present(self.imagePicker!, animated: true)
     }
    
-    
-
 }
 
 extension DTImageCropperViewController: UIImagePickerControllerDelegate , UINavigationControllerDelegate {
     
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        self.navigationController?.popViewController(animated: true)
+        picker.dismiss(animated: true) { [weak self] in
+            picker.delegate = self
+        }
     }
     
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         
         guard let image =  info[UIImagePickerController.InfoKey.originalImage] as? UIImage else { self.navigationController?.popViewController(animated: true); return }
-        
+        self.startImage = image
+        picker.dismiss(animated: true) { [weak self] in
+            picker.delegate = self
+            self?.imagePicker = nil
+        }
     }
     
 }

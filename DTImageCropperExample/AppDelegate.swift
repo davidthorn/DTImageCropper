@@ -16,14 +16,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        let vc = DTImageCropperViewController.init()
-        vc.startImage = UIImage.init(named: "car")
-        
-        let nav = UINavigationController.init(rootViewController: vc)
-        self.window?.rootViewController = nav
-        self.window?.makeKeyAndVisible()
-        
         return true
     }
 

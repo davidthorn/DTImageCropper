@@ -14,7 +14,6 @@ public class DTImageCropperScrollView: UIScrollView, UIScrollViewDelegate {
     
     public var startImage: UIImage? {
         didSet {
-            
             imageView.image = self.startImage
             contentSize = self.startImage == nil ? CGSize.init(width: 0, height: 0) : self.startImage!.size
             viewForZooming = self.imageView
