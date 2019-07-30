@@ -12,6 +12,8 @@ open class DTImageCropperViewController: UIViewController {
 
     public var startImage: UIImage?
     
+    internal var overlayView: DTOverlayView!
+    
     internal var imagePicker: UIImagePickerController?
     
     lazy var scrollView: DTImageCropperScrollView = {
@@ -24,6 +26,10 @@ open class DTImageCropperViewController: UIViewController {
         super.viewDidLoad()
         view.addSubview(scrollView)
         handleConstraints()
+        self.view.backgroundColor = UIColor.darkGray
+        self.overlayView = DTOverlayView.init()
+        self.overlayView.frame = view.bounds
+        view.addSubview(overlayView)
     }
     
     open override func viewDidAppear(_ animated: Bool) {

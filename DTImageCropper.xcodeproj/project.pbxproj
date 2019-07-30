@@ -20,6 +20,7 @@
 		448C2BE722EE46FF00DAEF95 /* DTImageCropper.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 448C2BB222EE428200DAEF95 /* DTImageCropper.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		448C2BEC22EE505E00DAEF95 /* constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448C2BEB22EE505E00DAEF95 /* constraints.swift */; };
 		448C2BEE22EE50A400DAEF95 /* DTImageCropperScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448C2BED22EE50A400DAEF95 /* DTImageCropperScrollView.swift */; };
+		448C2BF022EE57D700DAEF95 /* DTOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 448C2BEF22EE57D700DAEF95 /* DTOverlayView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		448C2BE422EE430200DAEF95 /* DTImageCropperViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DTImageCropperViewController.swift; sourceTree = "<group>"; };
 		448C2BEB22EE505E00DAEF95 /* constraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = constraints.swift; sourceTree = "<group>"; };
 		448C2BED22EE50A400DAEF95 /* DTImageCropperScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DTImageCropperScrollView.swift; sourceTree = "<group>"; };
+		448C2BEF22EE57D700DAEF95 /* DTOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DTOverlayView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -157,6 +159,7 @@
 				448C2BE422EE430200DAEF95 /* DTImageCropperViewController.swift */,
 				448C2BEB22EE505E00DAEF95 /* constraints.swift */,
 				448C2BED22EE50A400DAEF95 /* DTImageCropperScrollView.swift */,
+				448C2BEF22EE57D700DAEF95 /* DTOverlayView.swift */,
 			);
 			path = Classes;
 			sourceTree = "<group>";
@@ -307,6 +310,7 @@
 				448C2BEC22EE505E00DAEF95 /* constraints.swift in Sources */,
 				448C2BE522EE430200DAEF95 /* DTImageCropperViewController.swift in Sources */,
 				448C2BEE22EE50A400DAEF95 /* DTImageCropperScrollView.swift in Sources */,
+				448C2BF022EE57D700DAEF95 /* DTOverlayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -497,6 +501,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = DTImageCropper/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -524,6 +529,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = DTImageCropper/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -581,6 +587,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WR4VF3A3C5;
 				INFOPLIST_FILE = DTImageCropperExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -600,6 +607,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = WR4VF3A3C5;
 				INFOPLIST_FILE = DTImageCropperExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
