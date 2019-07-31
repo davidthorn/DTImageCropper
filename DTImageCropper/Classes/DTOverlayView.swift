@@ -32,7 +32,11 @@ struct Marker {
     }
     
     func contains(point: CGPoint) -> Bool {
-        return rect.contains(point)
+        
+        let bgLeft = rect.insetBy(dx: -20, dy: -20)
+        let bgRight = rect.insetBy(dx: 20, dy: 20)
+        
+        return bgLeft.contains(point) || bgRight.contains(point)
     }
 }
 
@@ -308,8 +312,12 @@ open class DTOverlayView: UIView {
             let x_ = point.x - hitPoint!.x
             let y_ = point.y - hitPoint!.y
             let tl = CGPoint.init(x: coords.tl.x + x_, y: coords.tl.y + y_)
-            coords = coords.convert(using: tl, width: w, height: h)
-            hitPoint = point
+            let new_coords = coords.convert(using: tl, width: w, height: h)
+            if bounds.contains(new_coords.tr) && bounds.contains(new_coords.tl) && bounds.contains(new_coords.bl) && bounds.contains(new_coords.br) {
+                coords = new_coords
+                hitPoint = point
+            }
+            
         }
         self.setNeedsDisplay()
     }
