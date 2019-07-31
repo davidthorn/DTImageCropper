@@ -8,9 +8,39 @@
 
 import UIKit
 
+enum Movement {
+    case horizontal
+    case vertical
+    case both
+}
+
+struct Marker {
+    let movement: Movement
+    let rect: CGRect
+    let box: Box
+    
+    enum Box {
+        case tl
+        case ct
+        case tr
+        case cr
+        case br
+        case cb
+        case bl
+        case cl
+        case inner
+    }
+    
+    func contains(point: CGPoint) -> Bool {
+        return rect.contains(point)
+    }
+}
+
 open class DTOverlayView: UIView {
     
+    var activeMarker: Marker?
     
+    var markers: [Marker] = []
     
     struct BoxCoordinates {
         let tl: CGPoint
@@ -22,13 +52,18 @@ open class DTOverlayView: UIView {
         let bl: CGPoint
         let cb: CGPoint /// center bottom
         
-        func convert(using point: CGPoint) -> BoxCoordinates {
-            let w = br.x - point.x
-            let h = br.y - point.y
+        func convert(using origin: CGPoint, width: CGFloat , height: CGFloat) -> BoxCoordinates {
+            
+            if min(width , height) < 40 {
+                return self
+            }
+            
+            let w = width
+            let h = height
             let w2 = w / 2
             let h2 = h / 2
             
-            let tl: CGPoint = point
+            let tl: CGPoint = origin
             let cl: CGPoint = .init(x: tl.x, y: tl.y + h2)
             let tr: CGPoint = .init(x: tl.x + w, y: tl.y)
             let ct: CGPoint = .init(x: tl.x + w2, y: tl.y)
@@ -39,7 +74,6 @@ open class DTOverlayView: UIView {
             
             return BoxCoordinates.init(tl: tl, cl: cl, tr: tr, ct: ct, br: br, cr: cr, bl: bl, cb: cb)
         }
-        
     }
     
     var coords: BoxCoordinates!
@@ -121,15 +155,46 @@ open class DTOverlayView: UIView {
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
     override open func draw(_ rect: CGRect) {
-        // Drawing code
+        markers.removeAll()
         
+        /// draw the dark shawdow that sits over the image
         UIColor.black.withAlphaComponent(0.4).setFill()
         UIRectFill(mainRect)
         
+        /// draw the outer border
         borderColor.setFill()
-        
         borderRect = CGRect.init(x: coords.tl.x , y: coords.tl.y , width: boxWidth , height: boxHeight)
         UIRectFill(borderRect)
+        
+        /// draw the movement markers first so that their inner fill will be removed in the next step
+        addMovementMarkers()
+        
+        /// draw the inner rect that will display the cropping area of the image
+        UIColor.clear.setFill()
+        innerRect = CGRect.init(x: borderRect.origin.x + 2 , y: borderRect.origin.y + 2, width: boxWidth - 4 , height: boxHeight - 4)
+        UIRectFill(innerRect)
+        
+        /// add the inner marker to the markers for touch and movement detection
+        self.markers.append(.init(movement: .both, rect: innerRect, box: .inner))
+    }
+    
+    func drawMarker(x: CGFloat , y: CGFloat , box: Marker.Box , widthMultiplier: CGFloat = 1.0 , heightMultiplier: CGFloat = 1.0) {
+        let marker = CGRect.init(x: x, y: y, width: selectionBorderWidth * widthMultiplier, height: selectionBorderHeight * heightMultiplier)
+        borderColor.setFill()
+        UIRectFill(marker)
+        switch box {
+        case .bl, .br , .tl, .tr:
+            markers.append(.init(movement: .both, rect: marker, box: box))
+        case .cb , .ct:
+            markers.append(.init(movement: .vertical, rect: marker, box: box))
+        case .cl , .cr:
+             markers.append(.init(movement: .horizontal, rect: marker, box: box))
+        default:
+            fatalError("This method should not deal with other markers")
+        }
+    }
+    
+    func addMovementMarkers() {
         drawCenterTopMarker()
         drawCenterBottomMarker()
         drawTopLeftMarker()
@@ -138,70 +203,60 @@ open class DTOverlayView: UIView {
         drawCenterRightMarker()
         drawBottomRightMarker()
         drawBottomLeftMarker()
-        UIColor.clear.setFill()
-        innerRect = CGRect.init(x: borderRect.origin.x + 2 , y: borderRect.origin.y + 2, width: boxWidth - 4 , height: boxHeight - 4)
-        UIRectFill(innerRect)
-    }
-    
-    func drawMarker(x: CGFloat , y: CGFloat , widthMultiplier: CGFloat = 1.0 , heightMultiplier: CGFloat = 1.0) {
-        let marker = CGRect.init(x: x, y: y, width: selectionBorderWidth * widthMultiplier, height: selectionBorderHeight * heightMultiplier)
-        borderColor.setFill()
-        UIRectFill(marker)
     }
     
     func drawCenterTopMarker() {
-        drawMarker(x: coords.ct.x - selectionBorderWidth, y: coords.ct.y - selectionBorderVisibleHeight , widthMultiplier: 1.4)
+        drawMarker(x: coords.ct.x - selectionBorderWidth, y: coords.ct.y - selectionBorderVisibleHeight , box: .ct , widthMultiplier: 1.4)
     }
     
     func drawCenterBottomMarker() {
-        drawMarker(x: coords.cb.x - selectionBorderWidth, y: coords.cb.y - (selectionBorderHeight - selectionBorderVisibleHeight) , widthMultiplier: 1.4)
+        drawMarker(x: coords.cb.x - selectionBorderWidth, y: coords.cb.y - (selectionBorderHeight - selectionBorderVisibleHeight) , box: .cb , widthMultiplier: 1.4)
     }
     
     func drawTopLeftMarker() {
-        drawMarker(x: coords.tl.x - selectionBorderVisibleWidth, y: coords.tl.y - selectionBorderVisibleHeight)
+        drawMarker(x: coords.tl.x - selectionBorderVisibleWidth, y: coords.tl.y - selectionBorderVisibleHeight , box: .tl)
     }
     
     func drawCenterLeftMarker() {
-        drawMarker(x: coords.cl.x - selectionBorderVisibleWidth, y: coords.cl.y - selectionBorderHeight , heightMultiplier: 1.4)
+        drawMarker(x: coords.cl.x - selectionBorderVisibleWidth, y: coords.cl.y - selectionBorderHeight , box: .cl , heightMultiplier: 1.4)
     }
     
     func drawTopRightMarker() {
-        drawMarker(x: coords.tr.x - (selectionBorderWidth - selectionBorderVisibleWidth ), y: coords.tr.y - selectionBorderVisibleHeight)
+        drawMarker(x: coords.tr.x - (selectionBorderWidth - selectionBorderVisibleWidth ), y: coords.tr.y - selectionBorderVisibleHeight , box: .tr )
     }
     
     func drawCenterRightMarker() {
-        drawMarker(x: coords.cr.x - (selectionBorderWidth - selectionBorderVisibleWidth ), y: coords.cr.y - selectionBorderHeight , heightMultiplier: 1.4)
+        drawMarker(x: coords.cr.x - (selectionBorderWidth - selectionBorderVisibleWidth ), y: coords.cr.y - selectionBorderHeight , box: .cr , heightMultiplier: 1.4)
     }
     
-    
     func drawBottomRightMarker() {
-        drawMarker(x: coords.br.x - (selectionBorderWidth - selectionBorderVisibleWidth ), y: coords.br.y - (selectionBorderHeight - selectionBorderVisibleHeight ) )
+        drawMarker(x: coords.br.x - (selectionBorderWidth - selectionBorderVisibleWidth ), y: coords.br.y - (selectionBorderHeight - selectionBorderVisibleHeight ) , box: .br )
     }
     
     func drawBottomLeftMarker() {
-        drawMarker(x: coords.bl.x - selectionBorderVisibleWidth, y: coords.bl.y - (selectionBorderHeight - selectionBorderVisibleHeight ) )
+        drawMarker(x: coords.bl.x - selectionBorderVisibleWidth, y: coords.bl.y - (selectionBorderHeight - selectionBorderVisibleHeight ) , box: .bl )
     }
+    
+    internal var hitPoint: CGPoint?
     
     open override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let o = super.hitTest(point, with: event)
         
-        if borderRect.insetBy(dx: -10, dy: -10).contains(point) {
-            if !innerRect.insetBy(dx: 10, dy: 10).contains(point) {
-                hitBorder(result: true)
-            } else {
-                hitBorder(result: false)
-            }
-        } else {
+        guard let touchedMarker = self.markers.first(where: { $0.contains(point: point) }) else {
             if self.borderColor != .white {
                 hitBorder(result: false)
             }
+            return o
         }
         
+        self.hitPoint = point
+        self.activeMarker = touchedMarker
+        hitBorder(result: true)
         return o
     }
     
     internal func hitBorder(result: Bool) {
-        self.borderColor = result ? .red : .white
+        self.borderColor = result ? UIColor.white.withAlphaComponent(0.9) : .white
         self.isUserInteractionEnabled = result
         self.allowResizing = result
         self.setNeedsDisplay()
@@ -209,9 +264,54 @@ open class DTOverlayView: UIView {
     
     open override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let point = touches.first?.location(in: self) , allowResizing else { return }
-        coords = coords.convert(using: point)
+        guard let active = self.activeMarker else { return }
+
+        switch active.box {
+        case .tl:
+            coords = coords.convert(using: point, width: coords.tr.x - point.x, height: coords.br.y - point.y)
+        case .bl:
+            let tl = CGPoint.init(x: point.x, y:  point.y - (point.y - coords.tr.y) )
+            coords = coords.convert(using: tl, width: coords.br.x - point.x, height: point.y - coords.tr.y)
+        case .br:
+            let w = point.x  - coords.tl.x
+            let h = point.y - coords.tl.y
+            let tl = CGPoint.init(x: point.x - w, y:  point.y - h )
+            coords = coords.convert(using: tl, width: w, height: h)
+        case .tr:
+            let w = point.x  - coords.bl.x
+            let h = coords.bl.y - point.y
+            let tl = CGPoint.init(x: point.x - w, y:  point.y )
+            coords = coords.convert(using: tl, width: w, height: h)
+        case .ct:
+            let w = coords.tr.x - coords.tl.x
+            let h = coords.br.y - point.y
+            let tl = CGPoint.init(x: coords.tl.x, y: point.y)
+            coords = coords.convert(using: tl, width: w, height: h)
+        case .cb:
+            let w = coords.tr.x - coords.tl.x
+            let h = point.y - coords.tl.y
+            let tl = CGPoint.init(x: coords.tl.x, y: point.y - h)
+            coords = coords.convert(using: tl, width: w, height: h)
+        case .cl:
+            let w = coords.tr.x - point.x
+            let h = coords.br.y - coords.tr.y
+            let tl = CGPoint.init(x: point.x, y: coords.tl.y)
+            coords = coords.convert(using: tl, width: w, height: h)
+        case .cr:
+            let w = point.x - coords.tl.x
+            let h = coords.br.y - coords.tr.y
+            let tl = CGPoint.init(x: coords.tl.x, y: coords.tl.y)
+            coords = coords.convert(using: tl, width: w, height: h)
+        case .inner:
+            let w = coords.tr.x - coords.tl.x
+            let h = coords.br.y - coords.tr.y
+            let x_ = point.x - hitPoint!.x
+            let y_ = point.y - hitPoint!.y
+            let tl = CGPoint.init(x: coords.tl.x + x_, y: coords.tl.y + y_)
+            coords = coords.convert(using: tl, width: w, height: h)
+            hitPoint = point
+        }
         self.setNeedsDisplay()
-        print(point)
     }
     
     open override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -219,6 +319,7 @@ open class DTOverlayView: UIView {
         self.allowResizing = false
         self.isUserInteractionEnabled = false
         self.borderColor = .white
+        self.activeMarker = nil
         self.setNeedsDisplay()
     }
     

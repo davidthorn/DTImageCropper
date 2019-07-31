@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         let vc = DTImageCropperViewController.init()
+        vc.startImage = UIImage.init(named: "car")
         self.present(vc, animated: true)
     }
 
